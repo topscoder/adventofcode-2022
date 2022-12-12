@@ -1,3 +1,4 @@
+import math
 import re
 
 # Parse stacks
@@ -7,11 +8,10 @@ instructions = []
 is_header = True
 is_instruction = False
 
-with open('example.txt') as f:
+with open('input.txt') as f:
     lines = f.read().split("\n")
 
     for line in lines:
-
         if line.strip() == "":
             is_header = False
             is_instruction = True
@@ -28,7 +28,9 @@ def parse_stack_lines(stack_lines):
     stacks = []
 
     line_stack_numbers = stack_lines.pop()
-    nr_stacks = len(line_stack_numbers) / 3
+    nr_stacks = math.ceil(len(line_stack_numbers) / 4)
+
+    print(f"The amount of stacks is: {nr_stacks}")
 
     # Init stacks list with empty items for amount of stacks
     i = 0
@@ -76,17 +78,29 @@ def parse_stack_line(line, stacks):
 
 
 stacks = parse_stack_lines(stacks)
+print(stacks)
 
 # Parse instructions
 for instruction_line in instructions:
+    if len(instruction_line.strip()) == 0:
+        continue
+
+    print("")
+    print(instruction_line)
+
     # move {amount} from {source} to {target}
-    matches = re.findall(r'^move ([\d]) from ([\d]) to ([\d])', instruction_line)
+    matches = re.findall(r'^move ([\d]+) from ([\d]) to ([\d])', instruction_line)
     amount = int(matches[0][0])
     source = int(matches[0][1])
     target = int(matches[0][2])
 
     # The pop() method removes the item at the given index from the list and returns the removed item.
+    if amount > len(stacks[source -1]):
+        print(f"Looks like we are bugging because moving {amount} from stack {stacks[source - 1]} seems impossible.")
+        exit(1)
+
     move = stacks[source - 1][0:amount]
+    print(f"moving: {move}")
     del stacks[source - 1][0:amount]
     move.reverse()
     stacks[target - 1] = move + stacks[target - 1]
