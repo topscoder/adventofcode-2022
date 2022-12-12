@@ -4,6 +4,7 @@ import re
 # Parse stacks
 stacks = []
 instructions = []
+nr_stacks = 0
 
 is_header = True
 is_instruction = False
@@ -50,14 +51,13 @@ def parse_stack_line(line, stacks):
         return stacks
 
     length = len(line)
-    # stack_amount = length / 3
-    mod = length % 3
+    stack_amount = math.ceil(length / 4)
 
     colsize = 3
     sepsize = 1
 
     col = 0
-    while col < (mod + 1):
+    while col < stack_amount:
         # col is either
         # -   (3 spaces)
         # - [X] (character between brackets)
