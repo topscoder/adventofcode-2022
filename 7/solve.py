@@ -1,3 +1,4 @@
+from rich import print as rprint
 import re
 
 """
@@ -39,15 +40,6 @@ people[3]['married'] = 'No'
 """
 
 
-directory_structure = {
-    '/': {
-        'type': 'directory',
-        'files': [],
-        'directories': []
-    },
-}
-
-
 def is_command(input) -> bool:
     return input[0] == "$"
 
@@ -86,31 +78,84 @@ def file_size(input) -> str:
     return match[1]
 
 
+class AocFile:
+    pass
+
+
+class AocDirectory:
+    pass
+
+
+class AocDirectory:
+    def __init__(self, name: str):
+        self._name = name
+        self._directories = []
+        self._files = []
+
+    def add_file(self, fle: AocFile):
+        self._files.append(fle)
+
+    def add_dir(self, dr: AocDirectory):
+        self._directories.append(dr)
+
+
+class AocFile:
+    def __init__(self, name: str, size: int, directory: AocDirectory):
+        self._name = name
+        self._size = size
+        self._parent_directory = directory
+
+
+directory_structure = {}
+
+
 with open('example.txt') as f:
     content_lines = f.read().split("\n")
 
     indent = ""
+    curdir = None
+    dirname = None
 
     for line in content_lines:
         iscommand = is_command(line)
         iscd = is_cd(line)
         cdtarget = cd_target(line)
-        # dirname = dir_name(line)
-        # isls = is_ls(line)
-        isfile = is_file(line)
-        isdir = is_dir(line)
 
-        if iscommand and iscd:
-            if cdtarget == "..":
-                indent = indent[0:-2]
-            else:
-                print(f"{indent}- {cdtarget} (dir)")
-                indent = indent + "  "
+        isls = is_ls(line)
+        isfile = is_file(line)
+
+        isdir = is_dir(line)
+        if isdir:
+            dirname = dir_name(line)
+
+        if iscommand:
+            if iscd:
+                if cdtarget != "..":
+                    curdir = cdtarget
+                    directory_structure[curdir] = AocDirectory(curdir)
+            if isls:
+                continue
 
         if isfile:
-            filename = file_name(line)
-            filesize = file_size(line)
-            print(f"{indent}- {filename} (file, size={filesize})")
+            fl = AocFile(
+                file_name(line),
+                file_size(line),
+                directory_structure[curdir])
+
+            directory_structure[curdir].add_file(fl)
+
+        # if isfile:
+        #     filename = file_name(line)
+        #     filesize = file_size(line)
+        #     print(f"{indent}- {filename} (file, size={filesize})")
+
+        # if isdir:
+        #     dirname = dir_name(line)
+        #     object = AocDirectory(dirname)
 
         # print(f"{line} \t\t\t is_command: {iscommand} | is_cd: {iscd} | cd_target: {cdtarget}")
 
+# rprint(directory_structure)
+
+for d in directory_structure:
+    rprint(d)
